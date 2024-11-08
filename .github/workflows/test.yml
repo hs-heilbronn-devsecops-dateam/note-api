@@ -1,6 +1,7 @@
 name: CI Pipeline
 
 on:
+  # Trigger pipeline on pull requests and pushes to the 'main' branch
   pull_request:
     branches:
       - main
@@ -10,47 +11,57 @@ on:
 
 jobs:
   build:
+    # Specify the runner environment (latest Ubuntu version)
     runs-on: ubuntu-latest
 
     steps:
+    # Step 1: Checkout the code from the repository
     - uses: actions/checkout@v2
       with:
-        fetch-depth: 0
+        fetch-depth: 0  # Fetch full history for more accurate version control
 
+    # Step 2: Set up Python environment with specified version
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.12.1
 
+    # Step 3: Install project dependencies
     - name: Install dependencies
       run: pip install -r requirements.txt
 
+    # Step 4: Install additional development dependencies (e.g., linters, testing tools)
     - name: Install development dependencies
       run: pip install -r requirements-dev.txt
 
+    # Step 5: Run tests and collect code coverage metrics with pytest
     - name: Run pytest with coverage
-      run: pytest --cov=note_api -n auto
+      run: pytest --cov=note_api -n auto  # Run tests in parallel
 
+    # Step 6: Upload coverage results to Codecov for visibility and tracking
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       with:
-        token: ${{ secrets.CODECOV_TOKEN }}
+        token: ${{ secrets.CODECOV_TOKEN }}  # Secure token from GitHub secrets
 
+    # Step 7: Perform security scan using Snyk to detect vulnerabilities in dependencies
     - name: Snyk Security Scan
       uses: snyk/actions/python@master
       env:
-       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-    
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}  # Snyk token securely stored in GitHub secrets
+
+    # Step 8: Log in to GitHub Container Registry to push Docker images
     - name: Log in to GitHub Container Registry
       uses: docker/login-action@v2
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GHCR_PAT }}
-    
-    - name: Build Docker image 
-      run: docker build . -t ghcr.io/${{ github.repository }}:latest 
+        username: ${{ github.actor }}  # GitHub actor automatically populates the username
+        password: ${{ secrets.GHCR_PAT }}  # Personal access token for authentication
 
-    - name: Push Docker image 
+    # Step 9: Build Docker image with the latest tag
+    - name: Build Docker image
+      run: docker build . -t ghcr.io/${{ github.repository }}:latest
+
+    # Step 10: Push the Docker image to GitHub Container Registry
+    - name: Push Docker image
       run: docker push ghcr.io/${{ github.repository }}:latest
-      
