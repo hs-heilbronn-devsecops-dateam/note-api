@@ -109,6 +109,3 @@ jobs:
         region: ${{ env.REGION }}
         env_vars: BACKEND=memory
 
-    # Step 16: Show the Cloud Run deployment URL
-    - name: Output Cloud Run URL
-      run: echo "Cloud Run URL: ${{ steps.deploy.outputs.url }}"
