@@ -13,7 +13,7 @@ permissions:
   id-token: write
 
 env:
-  PROJECT_ID: hs-heilbronn-devsecops  # GCP project ID
+  PROJECT_ID: note-api-hs-heilbronn-devsecops-dream-team  # GCP project ID
   REGION: europe-west3  # GCP region
   REPOSITORY: note-api  # Artifact Registry repository name
   WORKLOAD_IDENTITY_PROVIDER: 'projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos'  # Workload Identity Provider
