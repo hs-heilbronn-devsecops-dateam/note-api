@@ -17,8 +17,6 @@ env:
   PROJECT_ID: note-api-hs-heilbronn-devsecops-dateam  # GCP project ID
   REGION: europe-west3  # GCP region
   REPOSITORY: note-api  # Artifact Registry repository name
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos'  # Workload Identity Provider
-  SERVICE_ACCOUNT: 'hshn-devsecops-service-account@hs-heilbronn-devsecops.iam.gserviceaccount.com'  # Service Account for authentication
 
 jobs:
   build:
@@ -81,11 +79,12 @@ jobs:
         docker push ghcr.io/${{ github.repository }}:${SHORT_SHA}
 
     # Step 11: Authenticate with Google Cloud using Workload Identity Federation
-    - name: Authenticate with Google Cloud
-      uses: google-github-actions/auth@v2
-      with:
-        workload_identity_provider: ${{ env.WORKLOAD_IDENTITY_PROVIDER }}
-        service_account: ${{ env.SERVICE_ACCOUNT }}
+      - name: Authenticate with Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: '${{ vars.WIF_PROVIDER }}'
+          service_account: '${{ vars.WIF_SERVICE_ACCOUNT }}'
+
 
     # Step 12: Set up Google Cloud SDK
     - name: Set up Google Cloud SDK
