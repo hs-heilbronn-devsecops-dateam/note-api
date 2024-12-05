@@ -8,7 +8,6 @@ on:
     branches:
       - main
 
-# Ensure the workflow has the necessary permissions
 permissions:
   contents: read
   id-token: write
@@ -84,8 +83,8 @@ jobs:
     - name: Authenticate with Google Cloud
       uses: google-github-actions/auth@v2
       with:
-          workload_identity_provider: '${{ vars.WIF_PROVIDER }}'
-          service_account: '${{ vars.WIF_SERVICE_ACCOUNT }}'
+        workload_identity_provider: '${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
+        service_account: '${{ env.SERVICE_ACCOUNT }}'
 
     # Step 12: Set up Google Cloud SDK
     - name: Set up Google Cloud SDK
@@ -109,7 +108,7 @@ jobs:
     - name: Deploy to Google Cloud Run
       uses: google-github-actions/deploy-cloudrun@v2
       with:
-        service: ${{ env.REPOSITORY }}
+        service: note-api-hs-heilbronn  # Service name updated based on instructions
         image: "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ github.ref_name }}:${SHORT_SHA}"
         region: ${{ env.REGION }}
-        env_vars: BACKEND=memory
+        env_vars: BACKEND=memory  # Correctly setting the BACKEND environment variable
