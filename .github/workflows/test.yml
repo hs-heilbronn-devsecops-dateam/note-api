@@ -17,8 +17,8 @@ env:
   PROJECT_ID: note-api-hs-heilbronn-devsecops-dateam  # GCP project ID
   REGION: europe-west3  # GCP region
   REPOSITORY: note-api  # Artifact Registry repository name
-  WORKLOAD_IDENTITY_PROVIDER: projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos  # Workload Identity Provider
-  SERVICE_ACCOUNT: hshn-devsecops-service-account@hs-heilbronn-devsecops.iam.gserviceaccount.com  # Service Account for authentication
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos'  # Workload Identity Provider
+  SERVICE_ACCOUNT: 'hshn-devsecops-service-account@hs-heilbronn-devsecops.iam.gserviceaccount.com'  # Service Account for authentication
 
 jobs:
   build:
