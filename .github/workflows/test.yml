@@ -8,37 +8,38 @@ on:
     branches:
       - main
 
-# Ensure the workflow has the necessary permissions
 permissions:
   contents: read
   id-token: write
 
 env:
-  PROJECT_ID: note-api-hs-heilbronn-devsecops-dateam  # GCP project ID
-  REGION: europe-west3  # GCP region
-  REPOSITORY: note-api  # Artifact Registry repository name
+  PROJECT_ID: note-api-hs-heilbronn-devsecops-dateam
+  REGION: europe-west3
+  REPOSITORY: note-api
+  WORKLOAD_IDENTITY_PROVIDER: 'projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos'
+  SERVICE_ACCOUNT: 'hshn-devsecops-service-account@hs-heilbronn-devsecops.iam.gserviceaccount.com'
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the code from the repository
+    # Step 1: Checkout the code
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
 
-    # Step 2: Set up Python environment
+    # Step 2: Set up Python
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
         python-version: 3.12.1
 
-    # Step 3: Install project dependencies
+    # Step 3: Install dependencies
     - name: Install dependencies
       run: pip install -r requirements.txt
 
-    # Step 4: Install additional development dependencies
+    # Step 4: Install development dependencies
     - name: Install development dependencies
       run: pip install -r requirements-dev.txt
 
@@ -70,21 +71,20 @@ jobs:
     - name: Build Docker image
       run: |
         SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        docker build -t ghcr.io/${{ github.repository }}:${SHORT_SHA} .
+        docker build -t ghcr.io/${{ env.REPOSITORY }}:${SHORT_SHA} .
 
-    # Step 10: Push Docker image to GitHub Container Registry
+    # Step 10: Push Docker image
     - name: Push Docker image
       run: |
         SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        docker push ghcr.io/${{ github.repository }}:${SHORT_SHA}
+        docker push ghcr.io/${{ env.REPOSITORY }}:${SHORT_SHA}
 
-    # Step 11: Authenticate with Google Cloud using Workload Identity Federation
-      - name: Authenticate with Google Cloud
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: '${{ vars.WIF_PROVIDER }}'
-          service_account: '${{ vars.WIF_SERVICE_ACCOUNT }}'
-
+    # Step 11: Authenticate with Google Cloud
+    - name: Authenticate with Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: '${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
+        service_account: '${{ env.SERVICE_ACCOUNT }}'
 
     # Step 12: Set up Google Cloud SDK
     - name: Set up Google Cloud SDK
@@ -92,23 +92,23 @@ jobs:
       with:
         project_id: ${{ env.PROJECT_ID }}
 
-    # Step 13: Configure Docker for Google Artifact Registry
+    # Step 13: Configure Docker for Artifact Registry
     - name: Configure Docker for Artifact Registry
       run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
-    # Step 14: Tag and Push Docker image to Google Artifact Registry
+    # Step 14: Tag and Push Docker image to Artifact Registry
     - name: Push Docker image to Artifact Registry
       run: |
         SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-        IMAGE_URI="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ github.ref_name }}:${SHORT_SHA}"
-        docker tag ghcr.io/${{ github.repository }}:${SHORT_SHA} $IMAGE_URI
-        docker push $IMAGE_URI
+        IMAGE_URI="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}"
+        docker tag ghcr.io/${{ env.REPOSITORY }}:${SHORT_SHA} $IMAGE_URI:${SHORT_SHA}
+        docker push $IMAGE_URI:${SHORT_SHA}
 
     # Step 15: Deploy to Google Cloud Run
     - name: Deploy to Google Cloud Run
       uses: google-github-actions/deploy-cloudrun@v2
       with:
         service: ${{ env.REPOSITORY }}
-        image: "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ github.ref_name }}:${SHORT_SHA}"
+        image: "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}:${SHORT_SHA}"
         region: ${{ env.REGION }}
         env_vars: BACKEND=memory
