@@ -13,11 +13,11 @@ permissions:
   id-token: write
 
 env:
-  PROJECT_ID: note-api  # GCP project ID
+  PROJECT_ID: note-api-hs-heilbronn-devsecops-dateam  # GCP project ID
   REGION: europe-west3  # GCP region
   REPOSITORY: note-api  # Artifact Registry repository name
-  WORKLOAD_IDENTITY_PROVIDER: 'projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos'  # Workload Identity Provider
-  SERVICE_ACCOUNT: 'hshn-devsecops-service-account@hs-heilbronn-devsecops.iam.gserviceaccount.com'  # Service Account for authentication
+  WORKLOAD_IDENTITY_PROVIDER: projects/70756149774/locations/global/workloadIdentityPools/github-actions/providers/github-repos
+  SERVICE_ACCOUNT: hshn-devsecops-service-account@hs-heilbronn-devsecops.iam.gserviceaccount.com
 
 jobs:
   build:
@@ -108,7 +108,7 @@ jobs:
     - name: Deploy to Google Cloud Run
       uses: google-github-actions/deploy-cloudrun@v2
       with:
-        service: note-api-hs-heilbronn  # Service name updated based on instructions
+        service: note-api-hs-heilbronn  
         image: "${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ github.ref_name }}:${SHORT_SHA}"
         region: ${{ env.REGION }}
-        env_vars: BACKEND=memory  # Correctly setting the BACKEND environment variable
+        env_vars: BACKEND=memory 
