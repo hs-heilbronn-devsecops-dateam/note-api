@@ -55,7 +55,7 @@ jobs:
 
     # Step 7: Perform security scan
     - name: Snyk Security Scan
-      uses: snyk/actions/python@v1  # Use a stable version
+      uses: snyk/actions/python@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
