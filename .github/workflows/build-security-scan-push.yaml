@@ -78,10 +78,10 @@ jobs:
           service_account: '${{ vars.WIF_SERVICE_ACCOUNT }}'
           # Authenticates with Google Cloud using Workload Identity Federation
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ env.PROJECT_ID }}
+      #- name: Set up Google Cloud SDK
+      #  uses: google-github-actions/setup-gcloud@v2
+      #  with:
+      #    project_id: ${{ env.PROJECT_ID }}
           # Installs and configures the Google Cloud SDK for the specified project
 
       - name: Set up Docker
